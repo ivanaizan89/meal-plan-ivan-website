@@ -46,9 +46,9 @@ export async function POST(request: NextRequest) {
       mode: "subscription",
       metadata: { clerkUserId: userId, planType },
       // success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/?session_id={CHECKOUT_SESSION_ID}`,
-      // success_url: `https://api/generate-mealplan/route`,
+      success_url: `https://api/generate-mealplan/route`,
       // success_url: `@/app/api/generate-mealplan/route`,
-      success_url: `https://www.spirit-ashton.github.io`,
+      // success_url: `https://www.spirit-ashton.github.io`,
       cancel_url: `https://api/checkout/route`,
     });
 
