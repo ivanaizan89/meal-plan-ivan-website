@@ -195,7 +195,7 @@ export default function ProfilePage() {
                         <strong>Plan:</strong> {currentPlan.name}
                       </p>
                       <p>
-                        <strong>Amount:</strong> ${currentPlan.amount}{" "}
+                        <strong>Amount:</strong> ${currentPlan.priceID}{" "}
                         {currentPlan.currency}
                       </p>
                       <p>
@@ -226,7 +226,7 @@ export default function ProfilePage() {
                     </option>
                     {availablePlans.map((plan, key) => (
                       <option key={key} value={plan.interval}>
-                        {plan.name} - ${plan.amount} / {plan.interval}
+                        {plan.name} - ${plan.priceID} / {plan.interval}
                       </option>
                     ))}
                   </select>
