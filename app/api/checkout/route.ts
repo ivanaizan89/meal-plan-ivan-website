@@ -47,8 +47,9 @@ export async function POST(request: NextRequest) {
       customer_email: email,
       mode: "subscription",
       metadata: { clerkUserId: userId, planType },
-      success_url: `${baseUrl}/mealplan?session_id=\${CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/subscribe`,
+      success_url: `/api/generate-mealplan`,
+      // cancel_url: `/subscribe`,
+      cancel_url: `www.google.com`
 
     });
 
