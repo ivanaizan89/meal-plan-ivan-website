@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
       metadata: { clerkUserId: userId, planType },
       success_url: `/api/generate-mealplan`,
       // cancel_url: `/subscribe`,
-      cancel_url: `www.google.com`
+      cancel_url: `www.google.com`,
 
     });
 
