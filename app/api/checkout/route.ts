@@ -46,14 +46,16 @@ export async function POST(request: NextRequest) {
       ],
       customer_email: email,
       mode: "subscription",
-      metadata: { clerkUserId: userId, planType },
-      success_url: `/api/generate-mealplan`,
-      // cancel_url: `/subscribe`,
-      cancel_url: `https://www.google.com/`,
+          metadata: { clerkUserId: userId, planType },
+      // success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `https://api/generate-mealplan/route`,
+      // success_url: `@/app/api/generate-mealplan/route`,
+      // success_url: `https://www.spirit-ashton.github.io`,
+      cancel_url: `https://api/checkout/route`,
 
     });
 
-    return NextResponse.json({ url: session.url });
+    return NextResponse.json({ url: session.url });a
 
   } catch (error: any) {
     console.error("Checkout API Error:", error.message);
