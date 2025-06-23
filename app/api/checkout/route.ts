@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     });
 
-    return NextResponse.json({ url: session.url });a
+    return NextResponse.json({ url: session.url });
 
   } catch (error: any) {
     console.error("Checkout API Error:", error.message);
