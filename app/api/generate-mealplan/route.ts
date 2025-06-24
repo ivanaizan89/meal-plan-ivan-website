@@ -1,12 +1,6 @@
 // app/api/generate-mealplan/route.ts
 
 import { NextResponse } from "next/server";
-import { OpenAI } from "openai";
-
-const openai = new OpenAI({
-  baseURL: "https://openrouter.ai/api/v1", // Ensure this is the correct baseURL for your API
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 export async function POST(request: Request) {
   try {
@@ -26,11 +20,11 @@ export async function POST(request: Request) {
         - Lunch
         - Dinner
         ${snacks ? "- Snacks" : ""}
-      
+
       Use simple ingredients and provide brief instructions. Include approximate calorie counts for each meal.
-      
+
       Structure the response as a JSON object where each day is a key, and each meal (breakfast, lunch, dinner, snacks) is a sub-key. Example:
-      
+
       {
         "Monday": {
           "Breakfast": "Oatmeal with fruits - 350 calories",
@@ -50,44 +44,49 @@ export async function POST(request: Request) {
       Return just the json with no extra commentaries and no backticks.
     `;
 
-    // Send the prompt to the AI model
-    const response = await openai.chat.completions.create({
-      model: "meta-llama/llama-3.2-3b-instruct:free", // Ensure this model is accessible and suitable
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      temperature: 0.7, // Adjust for creativity vs. consistency
-      max_tokens: 1500, // Adjust based on expected response length
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "meta-llama/llama-3.2-3b-instruct:free",
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        temperature: 0.7,
+        max_tokens: 1500,
+      }),
     });
 
-    // Extract the AI's response
-    const aiContent = response.choices[0].message.content.trim();
+    const data = await response.json();
 
-    // Attempt to parse the AI's response as JSON
+    if (!response.ok) {
+      console.error("OpenRouter API error:", data);
+      return NextResponse.json({ error: "AI request failed." }, { status: 500 });
+    }
+
+    const aiContent = data.choices[0].message.content.trim();
+
     let parsedMealPlan: { [day: string]: DailyMealPlan };
-    console.log(aiContent);
     try {
       parsedMealPlan = JSON.parse(aiContent);
     } catch (parseError) {
       console.error("Error parsing AI response as JSON:", parseError);
-      // If parsing fails, return the raw text with an error message
       return NextResponse.json(
         { error: "Failed to parse meal plan. Please try again." },
         { status: 500 }
       );
     }
 
-    // Validate the structure of the parsedMealPlan
     if (typeof parsedMealPlan !== "object" || parsedMealPlan === null) {
       throw new Error("Invalid meal plan format received from AI.");
     }
 
-    // Optionally, perform additional validation on the structure here
-
-    // Return the parsed meal plan
     return NextResponse.json({ mealPlan: parsedMealPlan });
   } catch (error) {
     console.error("Error generating meal plan:", error);
@@ -98,7 +97,6 @@ export async function POST(request: Request) {
   }
 }
 
-// Define the DailyMealPlan interface here or import it if defined elsewhere
 interface DailyMealPlan {
   Breakfast?: string;
   Lunch?: string;
