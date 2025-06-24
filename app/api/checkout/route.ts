@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       // success_url: `https://meal-plan-ivan-website.vercel.app/api/generate-mealplan`,
       success_url:  `https://meal-plan-ivan-website.vercel.app/mealplan?dietType=Keto&calories=2000&allergies=None&cuisine=Italian&snacks=true`,
       // success_url: `@/app/api/generate-mealplan/route`,
-      cancel_url: `https://meal-plan-ivan-website.vercel.app/subscribe`,
+      cancel_url: `https://meal-plan-ivan-website.vercel.app/mealplan?dietType=Keto&calories=2000&allergies=None&cuisine=Italian&snacks=true`,
 
     });
 
