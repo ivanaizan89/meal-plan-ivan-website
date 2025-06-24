@@ -1,15 +1,17 @@
-// components/MealPlanDashboard.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
-import { Spinner } from "@/components/spinner";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 
+// Interfaces
 interface DailyMealPlan {
-  Breakfast?: string;
-  Lunch?: string;
-  Dinner?: string;
-  Snacks?: string;
+  breakfast?: string;
+  lunch?: string;
+  dinner?: string;
+  snacks?: string;
 }
 
 interface WeeklyMealPlan {
@@ -31,20 +33,19 @@ interface MealPlanInput {
 }
 
 export default function MealPlanDashboard() {
+  const searchParams = useSearchParams();
+
   const [dietType, setDietType] = useState("");
   const [calories, setCalories] = useState<number>(2000);
   const [allergies, setAllergies] = useState("");
   const [cuisine, setCuisine] = useState("");
   const [snacks, setSnacks] = useState(false);
 
-  // Initialize the mutation using React Query
   const mutation = useMutation<MealPlanResponse, Error, MealPlanInput>({
     mutationFn: async (payload: MealPlanInput) => {
       const response = await fetch("/api/generate-mealplan", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
@@ -57,22 +58,48 @@ export default function MealPlanDashboard() {
     },
   });
 
+  // Handle query params on first render
+  useEffect(() => {
+    const diet = searchParams.get("dietType");
+    const cal = searchParams.get("calories");
+    const allergy = searchParams.get("allergies");
+    const cui = searchParams.get("cuisine");
+    const snk = searchParams.get("snacks");
+
+    if (diet && cal) {
+      const payload: MealPlanInput = {
+        dietType: diet,
+        calories: parseInt(cal),
+        allergies: allergy || "",
+        cuisine: cui || "",
+        snacks: snk === "true",
+        days: 7,
+      };
+
+      // Set local state to match URL params
+      setDietType(diet);
+      setCalories(parseInt(cal));
+      setAllergies(allergy || "");
+      setCuisine(cui || "");
+      setSnacks(snk === "true");
+
+      mutation.mutate(payload);
+    }
+  }, [searchParams]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     const payload: MealPlanInput = {
       dietType,
       calories,
       allergies,
       cuisine,
       snacks,
-      days: 7, // Ensure a weekly plan is generated
+      days: 7,
     };
-
     mutation.mutate(payload);
   };
 
-  // Define the days of the week in order
   const daysOfWeek = [
     "Sunday",
     "Monday",
@@ -83,190 +110,151 @@ export default function MealPlanDashboard() {
     "Saturday",
   ];
 
-  // Function to retrieve the meal plan for a specific day
-  const getMealPlanForDay = (day: string): DailyMealPlan | undefined => {
+  const getMealPlanForDate = (date: Date): DailyMealPlan | undefined => {
     if (!mutation.data?.mealPlan) return undefined;
-
-    return mutation.data.mealPlan[day];
+    const dayName = daysOfWeek[date.getDay()];
+    return mutation.data.mealPlan[dayName];
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center  p-4">
-      <div className="w-full max-w-6xl flex flex-col md:flex-row bg-white shadow-lg rounded-lg overflow-hidden">
-        {/* Left Panel: Form */}
-        <div className="w-full md:w-1/3 lg:w-1/4 p-6 bg-emerald-500 text-white">
-          <h1 className="text-2xl font-bold mb-6 text-center">
-            AI Meal Plan Generator
-          </h1>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Diet Type */}
-            <div>
-              <label
-                htmlFor="dietType"
-                className="block text-sm font-medium mb-1"
-              >
-                Diet Type
-              </label>
-              <input
-                type="text"
-                id="dietType"
-                value={dietType}
-                onChange={(e) => setDietType(e.target.value)}
-                required
-                className="w-full px-3 py-2 border border-emerald-300 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                placeholder="e.g., Vegetarian, Keto, Mediterranean"
-              />
-            </div>
+    <div className="min-h-screen flex bg-gray-100">
+      {/* Left Panel: Form */}
+      <div className="w-full md:w-1/3 lg:w-1/4 p-6 bg-white shadow-md">
+        <h1 className="text-2xl font-bold mb-4">AI Meal Plan Generator</h1>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Diet Type */}
+          <div>
+            <label htmlFor="dietType" className="block text-sm font-medium text-gray-700">Diet Type</label>
+            <input
+              type="text"
+              id="dietType"
+              value={dietType}
+              onChange={(e) => setDietType(e.target.value)}
+              required
+              className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+              placeholder="e.g., Vegetarian, Keto, Mediterranean"
+            />
+          </div>
 
-            {/* Calories */}
-            <div>
-              <label
-                htmlFor="calories"
-                className="block text-sm font-medium mb-1"
-              >
-                Daily Calorie Goal
-              </label>
-              <input
-                type="number"
-                id="calories"
-                value={calories}
-                onChange={(e) => setCalories(Number(e.target.value))}
-                required
-                min={500}
-                max={5000}
-                className="w-full px-3 py-2 border border-emerald-300 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                placeholder="e.g., 2000"
-              />
-            </div>
+          {/* Calories */}
+          <div>
+            <label htmlFor="calories" className="block text-sm font-medium text-gray-700">Daily Calorie Goal</label>
+            <input
+              type="number"
+              id="calories"
+              value={calories}
+              onChange={(e) => setCalories(Number(e.target.value))}
+              required
+              min={500}
+              max={5000}
+              className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+              placeholder="e.g., 2000"
+            />
+          </div>
 
-            {/* Allergies */}
-            <div>
-              <label
-                htmlFor="allergies"
-                className="block text-sm font-medium mb-1"
-              >
-                Allergies or Restrictions
-              </label>
-              <input
-                type="text"
-                id="allergies"
-                value={allergies}
-                onChange={(e) => setAllergies(e.target.value)}
-                className="w-full px-3 py-2 border border-emerald-300 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                placeholder="e.g., Nuts, Dairy, None"
-              />
-            </div>
+          {/* Allergies */}
+          <div>
+            <label htmlFor="allergies" className="block text-sm font-medium text-gray-700">Allergies or Restrictions</label>
+            <input
+              type="text"
+              id="allergies"
+              value={allergies}
+              onChange={(e) => setAllergies(e.target.value)}
+              className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+              placeholder="e.g., Nuts, Dairy, None"
+            />
+          </div>
 
-            {/* Preferred Cuisine */}
-            <div>
-              <label
-                htmlFor="cuisine"
-                className="block text-sm font-medium mb-1"
-              >
-                Preferred Cuisine
-              </label>
-              <input
-                type="text"
-                id="cuisine"
-                value={cuisine}
-                onChange={(e) => setCuisine(e.target.value)}
-                className="w-full px-3 py-2 border border-emerald-300 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                placeholder="e.g., Italian, Chinese, No Preference"
-              />
-            </div>
+          {/* Preferred Cuisine */}
+          <div>
+            <label htmlFor="cuisine" className="block text-sm font-medium text-gray-700">Preferred Cuisine</label>
+            <input
+              type="text"
+              id="cuisine"
+              value={cuisine}
+              onChange={(e) => setCuisine(e.target.value)}
+              className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+              placeholder="e.g., Italian, Chinese, No Preference"
+            />
+          </div>
 
-            {/* Snacks */}
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="snacks"
-                checked={snacks}
-                onChange={(e) => setSnacks(e.target.checked)}
-                className="h-4 w-4 text-emerald-300 border-emerald-300 rounded"
-              />
-              <label htmlFor="snacks" className="ml-2 block text-sm text-white">
-                Include Snacks
-              </label>
-            </div>
+          {/* Snacks */}
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="snacks"
+              checked={snacks}
+              onChange={(e) => setSnacks(e.target.checked)}
+              className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+            />
+            <label htmlFor="snacks" className="ml-2 block text-sm text-gray-700">Include Snacks</label>
+          </div>
 
-            {/* Submit Button */}
-            <div>
-              <button
-                type="submit"
-                disabled={mutation.isPending}
-                className={`w-full bg-emerald-500 text-white py-2 px-4 rounded-md hover:bg-emerald-600 transition-colors ${
-                  mutation.isPending ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-              >
-                {mutation.isPending ? "Generating..." : "Generate Meal Plan"}
-              </button>
-            </div>
-          </form>
+          {/* Submit */}
+          <div>
+            <button
+              type="submit"
+              disabled={mutation.isPending}
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50"
+            >
+              {mutation.isPending ? "Generating..." : "Generate Meal Plan"}
+            </button>
+          </div>
+        </form>
 
-          {/* Error Message */}
-          {mutation.isError && (
-            <div className="mt-4 p-3 bg-red-200 text-red-800 rounded-md">
-              {mutation.error?.message || "An unexpected error occurred."}
-            </div>
-          )}
-        </div>
+        {mutation.isError && (
+          <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-md">
+            {mutation.error?.message || "An unexpected error occurred."}
+          </div>
+        )}
+      </div>
 
-        {/* Right Panel: Weekly Meal Plan Display */}
-        <div className="w-full md:w-2/3 lg:w-3/4 p-6 bg-gray-50">
-          <h2 className="text-2xl font-bold mb-6 text-emerald-700">
-            Weekly Meal Plan
-          </h2>
+      {/* Right Panel: Calendar */}
+      <div className="flex-1 p-6">
+        <h2 className="text-2xl font-bold mb-4">Weekly Meal Plan</h2>
 
-          {mutation.isSuccess && mutation.data.mealPlan ? (
-            <div className="h-[600px] overflow-y-auto">
-              <div className="space-y-6">
-                {daysOfWeek.map((day) => {
-                  const mealPlan = getMealPlanForDay(day);
-                  return (
-                    <div
-                      key={day}
-                      className="bg-white shadow-md rounded-lg p-4 border border-emerald-200"
-                    >
-                      <h3 className="text-xl font-semibold mb-2 text-emerald-600">
-                        {day}
-                      </h3>
-                      {mealPlan ? (
-                        <div className="space-y-2">
-                          <div>
-                            <strong>Breakfast:</strong> {mealPlan.Breakfast}
-                          </div>
-                          <div>
-                            <strong>Lunch:</strong> {mealPlan.Lunch}
-                          </div>
-                          <div>
-                            <strong>Dinner:</strong> {mealPlan.Dinner}
-                          </div>
-                          {mealPlan.Snacks && (
-                            <div>
-                              <strong>Snacks:</strong> {mealPlan.Snacks}
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <p className="text-gray-500">No meal plan available.</p>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ) : mutation.isPending ? (
-            <div className="flex justify-center items-center h-full">
-              {/* Spinner */}
-              <Spinner />
-            </div>
-          ) : (
-            <p className="text-gray-600">
-              Please generate a meal plan to see it here.
-            </p>
-          )}
-        </div>
+        {mutation.isSuccess && mutation.data.mealPlan ? (
+          <Calendar
+            tileContent={({ date, view }) =>
+              view === "month" ? (
+                <MealPlanCard mealPlan={getMealPlanForDate(date)} />
+              ) : null
+            }
+            tileClassName={({ date, view }) =>
+              view === "month" && date.toDateString() === new Date().toDateString()
+                ? "bg-blue-100"
+                : undefined
+            }
+          />
+        ) : (
+          <p>Please generate a meal plan to see it on the calendar.</p>
+        )}
       </div>
     </div>
   );
 }
+
+// Display meal plan info inside calendar cells
+interface MealPlanCardProps {
+  mealPlan?: DailyMealPlan;
+}
+
+const MealPlanCard: React.FC<MealPlanCardProps> = ({ mealPlan }) => {
+  if (!mealPlan) return null;
+
+  return (
+    <div className="mt-2 p-2 bg-blue-50 rounded-md text-xs">
+      <strong>Breakfast:</strong> {mealPlan.breakfast}
+      <br />
+      <strong>Lunch:</strong> {mealPlan.lunch}
+      <br />
+      <strong>Dinner:</strong> {mealPlan.dinner}
+      {mealPlan.snacks && (
+        <>
+          <br />
+          <strong>Snacks:</strong> {mealPlan.snacks}
+        </>
+      )}
+    </div>
+  );
+};
