@@ -1,6 +1,8 @@
 // app/profile/page.tsx
 "use client";
 
+console.log("1")
+
 import { useUser } from "@clerk/nextjs";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { availablePlans, Plan } from "@/lib/plans"; // Adjust the path based on your project structure
@@ -10,10 +12,14 @@ import toast, { Toaster } from "react-hot-toast"; // Import toast
 import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/spinner";
 
+console.log("2")
+
 export default function ProfilePage() {
   const { isLoaded, isSignedIn, user } = useUser();
   const queryClient = useQueryClient();
   const router = useRouter();
+
+console.log("3")
 
   // State to manage selected priceId
   const [selectedPlan, setSelectedPlan] = useState<string>("");
@@ -37,6 +43,8 @@ export default function ProfilePage() {
     enabled: isLoaded && isSignedIn,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
+
+  console.log("4")
 
   // Adjusted Matching Logic Using priceId
   const currentPlan = availablePlans.find(
@@ -66,6 +74,7 @@ export default function ProfilePage() {
       return res.json();
     },
 
+
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["subscription"] });
       toast.success("Subscription plan updated successfully.");
@@ -74,6 +83,8 @@ export default function ProfilePage() {
       toast.error(error.message);
     },
   });
+
+  console.log("5")
 
   // Mutation: Unsubscribe
   const unsubscribeMutation = useMutation<
@@ -94,12 +105,14 @@ export default function ProfilePage() {
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["subscription"] });
-      // router.push("/subscribe");
+      router.push("/subscribe");
     },
     onError: (error) => {
       toast.error(error.message);
     },
   });
+
+  console.log("6")
 
   // Handler for confirming plan change
   const handleConfirmChangePlan = () => {
@@ -145,6 +158,8 @@ export default function ProfilePage() {
       </div>
     );
   }
+
+  console.log("7")
 
   // Main Profile Page UI
   return (
@@ -272,4 +287,6 @@ export default function ProfilePage() {
       </div>
     </div>
   );
+
+  console.log("8")
 }
