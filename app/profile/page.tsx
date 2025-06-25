@@ -94,7 +94,7 @@ export default function ProfilePage() {
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["subscription"] });
-      router.push("/subscribe");
+      // router.push("/subscribe");
     },
     onError: (error) => {
       toast.error(error.message);
