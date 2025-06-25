@@ -48,8 +48,8 @@ export async function POST(request: NextRequest) {
       mode: "subscription",
           metadata: { clerkUserId: userId, planType },
       // success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/?session_id={CHECKOUT_SESSION_ID}`,
-      // success_url: `https://meal-plan-ivan-website.vercel.app/api/generate-mealplan`,
-      success_url:  `https://meal-plan-ivan-website.vercel.app/mealplan?dietType=Keto&calories=2000&allergies=None&cuisine=Italian&snacks=true`,
+      // success_url: `https://www.google.com`
+      success_url: `https://www.google.com`,
       // success_url: `@/app/api/generate-mealplan/route`,
       cancel_url: `https://meal-plan-ivan-website.vercel.app/mealplan?dietType=Keto&calories=2000&allergies=None&cuisine=Italian&snacks=true`,
 
