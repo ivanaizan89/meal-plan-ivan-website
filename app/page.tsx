@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabaseClient";
 
 export default function HomePage() {
   const [todos, setTodos] = useState<any[]>([]);
+  const [imageKey, setImageKey] = useState<number>(Date.now());
 
   useEffect(() => {
     const fetchTodos = async () => {
@@ -16,6 +17,10 @@ export default function HomePage() {
 
     fetchTodos();
   }, []);
+
+  const handleNewImage = () => {
+    setImageKey(Date.now()); // triggers a new image load
+  };
 
   return (
     <div className="px-4 py-8 sm:py-12 lg:py-16 max-w-7xl mx-auto">
@@ -41,11 +46,18 @@ export default function HomePage() {
         </p>
         <div className="flex justify-center mb-4">
           <img
-            src="https://source.unsplash.com/800x600/?food&sig=123"
-            alt="Food test"
+            key={imageKey}
+            src={`https://picsum.photos/800/600?random=${imageKey}`}
+            alt="Random food"
             className="rounded-lg shadow-lg max-w-full h-auto"
           />
         </div>
+        <button
+          onClick={handleNewImage}
+          className="bg-emerald-500 text-white px-4 py-2 rounded hover:bg-emerald-600 transition-colors"
+        >
+          Show Another Dish
+        </button>
       </section>
 
       {/* How It Works Section */}
@@ -57,19 +69,16 @@ export default function HomePage() {
           </p>
         </div>
         <div className="flex flex-col md:flex-row justify-center items-start space-y-8 md:space-y-0 md:space-x-8">
-          {/* Step 1 */}
           <StepCard
             title="Create an Account"
             description="Sign up or sign in to access your personalized meal plans."
             iconPath="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14v7m-3-3h6"
           />
-          {/* Step 2 */}
           <StepCard
             title="Set Your Preferences"
             description="Input your dietary preferences and goals to tailor your meal plans."
             iconPath="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6 M9 12h6"
           />
-          {/* Step 3 */}
           <StepCard
             title="Receive Your Meal Plan"
             description="Get your customized meal plan delivered weekly to your account."
