@@ -82,7 +82,7 @@ export default function HomePage() {
       <section className="mt-12">
         <h2 className="text-2xl font-semibold mb-4">Your Todos</h2>
         {todos.length === 0 ? (
-          <p className="text-gray-600">No todos found.</p>
+          <p className="text-gray-600"></p>
         ) : (
           <ul className="list-disc list-inside">
             {todos.map((todo) => (
