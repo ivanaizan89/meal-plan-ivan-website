@@ -48,8 +48,9 @@ export async function POST(request: NextRequest) {
       mode: "subscription",
       metadata: { clerkUserId: userId, planType },
       // success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/?session_id={CHECKOUT_SESSION_ID}`,
-      success_url: `https://api/generate-mealplan/route`,
-      cancel_url: `https://api/checkout/route`,
+      success_url: `${baseUrl}/mealplan?session_id={CHECKOUT_SESSION_ID}`,
+cancel_url: `${baseUrl}/checkout/cancel`,
+
     });
 
     return NextResponse.json({ url: session.url });
