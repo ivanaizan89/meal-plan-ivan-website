@@ -6,7 +6,6 @@ import { supabase } from "@/lib/supabaseClient";
 
 export default function HomePage() {
   const [todos, setTodos] = useState<any[]>([]);
-  const [imageSig, setImageSig] = useState(Math.floor(Math.random() * 10000));
 
   useEffect(() => {
     const fetchTodos = async () => {
@@ -42,17 +41,11 @@ export default function HomePage() {
         </p>
         <div className="flex justify-center mb-4">
           <img
-            src={`https://source.unsplash.com/800x600/?food&sig=${imageSig}`}
-            alt="AI Food Inspiration"
+            src="https://source.unsplash.com/800x600/?food&sig=123"
+            alt="Food test"
             className="rounded-lg shadow-lg max-w-full h-auto"
           />
         </div>
-        <button
-          onClick={() => setImageSig(Math.floor(Math.random() * 10000))}
-          className="bg-emerald-500 text-white font-medium px-5 py-2 rounded hover:bg-emerald-600 transition-colors"
-        >
-          🔄 Show Another Dish
-        </button>
       </section>
 
       {/* How It Works Section */}
