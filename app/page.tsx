@@ -1,25 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabaseClient";
 
 export default function HomePage() {
-  const [todos, setTodos] = useState<any[]>([]);
   const [imageKey, setImageKey] = useState<number>(Date.now());
 
-  useEffect(() => {
-    const fetchTodos = async () => {
-      const { data, error } = await supabase.from("todos").select("*");
-      if (error) console.error(error);
-      else setTodos(data ?? []);
-    };
-
-    fetchTodos();
-  }, []);
-
   const handleNewImage = () => {
-    setImageKey(Date.now()); // triggers a new image load
+    setImageKey(Date.now());
   };
 
   return (
@@ -47,7 +35,7 @@ export default function HomePage() {
         <div className="flex justify-center mb-4">
           <img
             key={imageKey}
-            src={`https://picsum.photos/800/600?random=${imageKey}`}
+            src={`https://source.unsplash.com/800x600/?food&sig=${imageKey}`}
             alt="Random food"
             className="rounded-lg shadow-lg max-w-full h-auto"
           />
@@ -85,22 +73,6 @@ export default function HomePage() {
             iconPath="M5 13l4 4L19 7"
           />
         </div>
-      </section>
-
-      {/* Your Todos Section */}
-      <section className="mt-12">
-        <h2 className="text-2xl font-semibold mb-4">Your Todos</h2>
-        {todos.length === 0 ? (
-          <p className="text-gray-600">No todos yet.</p>
-        ) : (
-          <ul className="list-disc list-inside">
-            {todos.map((todo) => (
-              <li key={todo.id} className="mb-1">
-                {todo.task} {todo.is_complete ? "(Done)" : ""}
-              </li>
-            ))}
-          </ul>
-        )}
       </section>
     </div>
   );
