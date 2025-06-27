@@ -6,6 +6,7 @@ export async function POST(request: NextRequest) {
   try {
     const { planType, userId, email } = await request.json();
 
+    // Validate input
     if (!planType || !userId || !email) {
       return NextResponse.json(
         { error: "Plan type, User ID, and Email are required." },
@@ -13,46 +14,53 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate plan type
     const allowedPlanTypes = ["week", "month", "year"];
-    if (!allowedPlanTypes.includes(planType)) { 
+    if (!allowedPlanTypes.includes(planType)) {
       return NextResponse.json(
         { error: "Invalid plan type." },
         { status: 400 }
       );
     }
 
+    // Get price ID based on plan type
     const priceId = getPriceIdFromType(planType);
-    // const priceId = planType.priceID;
-    // console.log(priceId)
-    // console.log(planType)
     if (!priceId) {
       return NextResponse.json(
-        // { error: "Price ID for the selected plan not found." },
         { error: "Price ID for the selected plan not found." },
         { status: 400 }
       );
     }
 
-    const baseUrl=process.env.NEXT_PUBLIC_BASE_URL
+    // Get base URL from environment
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    if (!baseUrl) {
+      return NextResponse.json(
+        { error: "Base URL is not defined in environment variables." },
+        { status: 500 }
+      );
+    }
 
+    // Create Stripe Checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
         {
           price: priceId,
           quantity: 1,
-
         },
       ],
-     customer_email: email,
+      customer_email: email,
       mode: "subscription",
-      metadata: { clerkUserId: userId, planType },
-      // success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/?session_id={CHECKOUT_SESSION_ID}`,
+      metadata: {
+        clerkUserId: userId,
+        planType,
+      },
       success_url: `${baseUrl}/mealplan?session_id={CHECKOUT_SESSION_ID}`,
-cancel_url: `${baseUrl}/checkout/cancel`,
-
+      cancel_url: `${baseUrl}/checkout/cancel`,
     });
 
+    // Return session URL to redirect
     return NextResponse.json({ url: session.url });
 
   } catch (error: any) {
@@ -62,5 +70,4 @@ cancel_url: `${baseUrl}/checkout/cancel`,
       { status: 500 }
     );
   }
-
 }
