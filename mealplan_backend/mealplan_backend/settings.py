@@ -25,8 +25,11 @@ SECRET_KEY = 'django-insecure-k0b@wg=h%*4cz68+&)=vfgibhc6$vrmpf$6y6%)wysv4ajdiv&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = [
+    'meal-plan-back-end.onrender.com',  # your Render backend URL
+    'localhost',
+    '127.0.0.1',
+]
 
 # Application definition
 
@@ -40,6 +43,7 @@ INSTALLED_APPS = [
     
     'rest_framework',
     'mealplan',
+     "corsheaders",
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -48,6 +52,7 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -55,7 +60,14 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+     
 ]
+
+CORS_ALLOWED_ORIGINS = [
+    "https://meal-plan-ivan-website.vercel.app",  # your Vercel frontend URL
+]
+
+
 
 ROOT_URLCONF = 'mealplan_backend.urls'
 
