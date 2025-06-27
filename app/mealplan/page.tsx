@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import Calendar from "react-calendar";
@@ -32,7 +32,7 @@ interface MealPlanInput {
   days?: number;
 }
 
-export default function MealPlanDashboard() {
+function MealPlanDashboard() {
   const searchParams = useSearchParams();
 
   const [dietType, setDietType] = useState("");
@@ -76,7 +76,6 @@ export default function MealPlanDashboard() {
         days: 7,
       };
 
-      // Set local state to match URL params
       setDietType(diet);
       setCalories(parseInt(cal));
       setAllergies(allergy || "");
@@ -234,7 +233,6 @@ export default function MealPlanDashboard() {
   );
 }
 
-// Display meal plan info inside calendar cells
 interface MealPlanCardProps {
   mealPlan?: DailyMealPlan;
 }
@@ -258,3 +256,11 @@ const MealPlanCard: React.FC<MealPlanCardProps> = ({ mealPlan }) => {
     </div>
   );
 };
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Loading meal plan...</div>}>
+      <MealPlanDashboard />
+    </Suspense>
+  );
+}
