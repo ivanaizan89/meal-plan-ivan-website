@@ -50,7 +50,6 @@ export async function POST(request: NextRequest) {
       // success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/?session_id={CHECKOUT_SESSION_ID}`,
       success_url: `https://api/generate-mealplan/route`,
       cancel_url: `https://api/checkout/route`,
-
     });
 
     return NextResponse.json({ url: session.url });
