@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
         clerkUserId: userId,
         planType,
       },
-      success_url: `${baseUrl}/generate-mealplan? session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${baseUrl}/generate-mealplan?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/checkout/cancel`,
     });
 
