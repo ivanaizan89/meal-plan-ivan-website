@@ -17,8 +17,8 @@ export async function POST(req: NextRequest) {
       clerkUserId: userId, // or however you're tracking users
       planType,
     },
-    success_url: "https://your-site.com/success",
-    cancel_url: "https://your-site.com/cancel",
+    success_url: `https://api/generate-mealplan/route`,
+    cancel_url: `https://api/checkout/route`,
   });
 
   return NextResponse.json({ url: session.url });
