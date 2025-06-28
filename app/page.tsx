@@ -30,7 +30,7 @@ export default function HomePage() {
   const fetchRandomMeal = async () => {
     setLoadingMeal(true);
     try {
-      const res = await fetch("https://www.themealdb.com/api/json/v1/1/random.php");
+      const res = await fetch("www.themealdb.com/api/json/v1/1/lookup.php?i=52772");
       const data = await res.json();
       if (data.meals && data.meals.length > 0) {
         const mealData = data.meals[0];
