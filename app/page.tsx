@@ -49,15 +49,29 @@ export default function HomePage() {
     }
   };
 
-  // Fetch AI-generated healthy meal
+  // Updated fetch AI-generated healthy meal
   const fetchAiMeal = async () => {
     setLoadingAiMeal(true);
     try {
-      const res = await fetch("/api/ai-meal", { method: "POST" });
+      const res = await fetch("/api/ai-meal", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json", // MUST set this
+        },
+        body: JSON.stringify({
+          prompt: "Suggest a healthy meal idea for me.", // send a prompt for AI
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`API error: ${res.statusText}`);
+      }
+
       const data = await res.json();
-      setAiMeal(data.meal);
+      setAiMeal(data.result); // Use `result` because your API returns { result: "...response..." }
     } catch (error) {
       console.error("Failed to fetch AI meal:", error);
+      setAiMeal("Failed to get AI meal suggestion.");
     } finally {
       setLoadingAiMeal(false);
     }
@@ -87,7 +101,9 @@ export default function HomePage() {
       {/* TheMealDB Image Suggestion */}
       <section className="mb-12 text-center">
         <h2 className="text-2xl font-semibold mb-4">Random Meal Inspiration 🍽️</h2>
-        <p className="text-gray-600 mb-4">Here's something tasty suggested by our image engine.</p>
+        <p className="text-gray-600 mb-4">
+          Here's something tasty suggested by our image engine.
+        </p>
         <div className="flex justify-center mb-4">
           {loadingMeal ? (
             <p>Loading image...</p>
@@ -114,7 +130,13 @@ export default function HomePage() {
         <h2 className="text-2xl font-semibold mb-4">AI Healthy Meal Suggestion 🧠🥗</h2>
         <p className="text-gray-600 mb-4">AI recommends this for your next healthy meal:</p>
         <div className="bg-gray-100 p-4 rounded-lg max-w-xl mx-auto shadow text-left whitespace-pre-wrap">
-          {loadingAiMeal ? <p>Loading AI meal...</p> : aiMeal ? aiMeal : <p>No suggestion found.</p>}
+          {loadingAiMeal ? (
+            <p>Loading AI meal...</p>
+          ) : aiMeal ? (
+            aiMeal
+          ) : (
+            <p>No suggestion found.</p>
+          )}
         </div>
         <button
           onClick={fetchAiMeal}
@@ -190,12 +212,7 @@ function StepCard({
           viewBox="0 0 24 24"
           stroke="currentColor"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d={iconPath}
-          />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={iconPath} />
         </svg>
       </div>
       <h3 className="text-xl font-medium mb-2">{title}</h3>
