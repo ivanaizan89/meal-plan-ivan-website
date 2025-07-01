@@ -1,59 +1,33 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
-console.log("ENV KEY:", process.env.OPENROUTER_API_KEY); // ✅ Logs to terminal
-
 const openai = new OpenAI({
-  apiKey: process.env.OPENROUTER_API_KEY, // ✅ Loaded from .env.local
+  apiKey: process.env.OPENROUTER_API_KEY || "", // Make sure your .env file has this key set
 });
 
-
-export async function POST(request: NextRequest) {
-  let body: { prompt?: string };
-  try {
-    body = await request.json();
-  } catch (error) {
-    console.error("❌ Invalid or missing JSON:", error);
-    return NextResponse.json(
-      { error: "Invalid or missing JSON body" },
-      { status: 400 }
-    );
-  }
-
-  if (!body.prompt || typeof body.prompt !== "string") {
-    return NextResponse.json(
-      { error: "Missing or invalid prompt" },
-      { status: 400 }
-    );
-  }
+export async function POST(req: Request) {
+  const body = await req.json();
+  const prompt = body.prompt || "Give me a healthy dinner idea.";
 
   try {
     const chatCompletion = await openai.chat.completions.create({
-      model: "openai/gpt-3.5-turbo", // cheaper model
+      model: "gpt-3.5-turbo",
       messages: [
         { role: "system", content: "You are a helpful meal planner." },
-        { role: "user", content: body.prompt },
+        { role: "user", content: prompt },
       ],
     });
 
-    const result = chatCompletion.choices[0].message?.content ?? "";
-
+    const result = chatCompletion.choices[0]?.message?.content;
     return NextResponse.json({ result });
-  } catch (error: any) {
-    console.error("OpenAI API error:", error);
+  } catch (error) {
+    console.error("❌ AI API error:", error);
 
-    // Handle 402 Payment Required explicitly
-    if (error.status === 402) {
-      return NextResponse.json(
-        { error: "Payment required. Please check your API billing." },
-        { status: 402 }
-      );
-    }
-
-    // Generic server error fallback
-    return NextResponse.json(
-      { error: "Failed to generate AI meal suggestion." },
-      { status: 500 }
-    );
+    // ✅ Fallback meal if quota error, bad key, etc.
+    const fallbackMessage = "Grilled chicken with quinoa and roasted vegetables.";
+    return NextResponse.json({
+      result: fallbackMessage,
+      error: "AI quota exceeded. Showing fallback meal.",
+    });
   }
 }
