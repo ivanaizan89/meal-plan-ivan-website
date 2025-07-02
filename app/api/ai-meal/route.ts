@@ -7,14 +7,13 @@ const openai = new OpenAI({
 
 export async function POST(req: Request) {
   const body = await req.json();
-  const prompt = body.prompt || `Give me a healthy ${["dinner", "lunch", "snack", "low-carb", "vegan"][Math.floor(Math.random() * 5)]} idea.`;
+  const prompt = body.prompt || "Give me a healthy dinner idea.";
 
   try {
     const chatCompletion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
-        temperature: 0.9,
       messages: [
-        { role: "system", content: "You are a creative and diverse meal planner." },
+        { role: "system", content: "You are a helpful meal planner." },
         { role: "user", content: prompt },
       ],
     });
